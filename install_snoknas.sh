@@ -92,17 +92,26 @@ echo -e "${BLUE}>>> Updating System Repositories...${NC}"
 sudo apt-get update && sudo apt-get upgrade -y
 check_error
 
+# 1.1 Remove Broken Repos (Fix for 45drives error)
+if [ -f /etc/apt/sources.list.d/45drives.list ]; then
+    log_warn "Removing broken 45drives repository..."
+    rm -f /etc/apt/sources.list.d/45drives.list
+fi
+
 # 2. Dependencies
 DEPENDENCIES=(
     "curl" "wget" "git" "build-essential" "software-properties-common"
     "zfsutils-linux" "samba" "smbclient" "nfs-kernel-server"
     "python3" "python3-pip" "python3-venv"
-    "smartmontools" "lm-sensors" "hddtemp" "hdparm"
+    "smartmontools" "lm-sensors" "hdparm"
     "qemu-kvm" "libvirt-daemon-system" "libvirt-clients" "bridge-utils"
-    "nginx"
+    "nginx" "npm" "nodejs"
 )
 
 echo -e "${BLUE}>>> Installing Core Dependencies...${NC}"
+sudo apt-get update --allow-releaseinfo-change
+# Forced install of critical packages first to ensure command availability
+sudo apt-get install -y nginx npm nodejs
 sudo apt-get install -y "${DEPENDENCIES[@]}" &
 spinner $!
 check_error
@@ -166,6 +175,8 @@ if [ -d "$SCRIPT_DIR/web-ui" ]; then
     echo "Installing NPM dependencies..."
     cd "$INSTALL_DIR/web-ui" || exit
     # Attempt to install dependencies
+    # Fix for npm not found: reload bash hash or specify path if needed, but apt install should handle it.
+    hash -r
     npm install --silent
     check_error
     
@@ -188,6 +199,8 @@ check_error
 echo -e "${BLUE}>>> Configuring Services...${NC}"
 
 # Nginx
+mkdir -p /etc/nginx/sites-available
+mkdir -p /etc/nginx/sites-enabled
 cp "$SCRIPT_DIR/snoknas.nginx" /etc/nginx/sites-available/snoknas
 ln -sf /etc/nginx/sites-available/snoknas /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
