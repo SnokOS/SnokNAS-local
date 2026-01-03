@@ -154,25 +154,60 @@ sudo chown -R "$USER":"$USER" "$INSTALL_DIR"
 
 log_info "Installation directory: $INSTALL_DIR"
 
-# 8. Web UI Setup (Build Placeholder)
-# This part assumes we will deploy the built files here later.
-echo -e "${BLUE}>>> Preparing Web UI Environment...${NC}"
-# In a real scenario, we would clone the repo here.
-# git clone https://github.com/snokos/snoknas-ui.git "$INSTALL_DIR/ui" || log_warn "Repo placeholder"
+# 8. Web UI Setup (Build & Deploy)
+echo -e "${BLUE}>>> Building Web UI...${NC}"
+# We assume the source is in the current directory where the script is run
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-# 9. Backend Setup (Environment)
-echo -e "${BLUE}>>> Preparing Backend Environment...${NC}"
-python3 -m venv "$INSTALL_DIR/venv"
-source "$INSTALL_DIR/venv/bin/activate"
-pip install fastapi uvicorn psutil smart-open zfs-api docker
-deactivate
+if [ -d "$SCRIPT_DIR/web-ui" ]; then
+    echo "Found Web UI source. Copying to install directory..."
+    cp -r "$SCRIPT_DIR/web-ui" "$INSTALL_DIR/"
+    
+    echo "Installing NPM dependencies..."
+    cd "$INSTALL_DIR/web-ui" || exit
+    # Attempt to install dependencies
+    npm install --silent
+    check_error
+    
+    echo "Building React Application..."
+    npm run build
+    check_error
+else
+    log_error "Web UI source directory not found in $SCRIPT_DIR/web-ui"
+    exit 1
+fi
+
+# 9. Backend Setup
+echo -e "${BLUE}>>> Setting up Backend...${NC}"
+cp -r "$SCRIPT_DIR/backend" "$INSTALL_DIR/"
+cd "$INSTALL_DIR/backend" || exit
+pip install -r requirements.txt --break-system-packages
+check_error
+
+# 10. Service Configuration (Nginx & Systemd)
+echo -e "${BLUE}>>> Configuring Services...${NC}"
+
+# Nginx
+cp "$SCRIPT_DIR/snoknas.nginx" /etc/nginx/sites-available/snoknas
+ln -sf /etc/nginx/sites-available/snoknas /etc/nginx/sites-enabled/
+rm -f /etc/nginx/sites-enabled/default
+systemctl restart nginx
+check_error
+
+# Systemd Backend
+cp "$SCRIPT_DIR/snoknas-backend.service" /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable snoknas-backend
+systemctl start snoknas-backend
+check_error
 
 echo -e "${GREEN}"
 echo "================================================="
 echo "   SnokNAS Installation Complete!                "
 echo "================================================="
-echo " 1. Web UI will be available at http://$(hostname -I | awk '{print $1}'):80"
-echo " 2. Ensure drives are connected for ZFS setup."
+echo " 1. Access Dashboard at: http://$(hostname -I | awk '{print $1}')"
+echo " 2. Backend API is active."
 echo " 3. Default user: admin / admin"
 echo "================================================="
 echo -e "${NC}"
+
