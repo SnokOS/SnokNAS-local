@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-snok-bg text-snok-text;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-snok-surface/50 backdrop-blur-md border border-white/10 shadow-xl;
+  }
+  
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-sm border border-white/5 rounded-xl hover:bg-white/10 transition-colors duration-300;
+  }
+
+  .neon-text {
+    text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+
+  .neon-border {
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-snok-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-snok-surface rounded-full border border-snok-bg;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-snok-muted;
+}
