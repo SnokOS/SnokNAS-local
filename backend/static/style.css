@@ -1,0 +1,316 @@
+/* SnokNAS Premium Design System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+    --bg-dark: #0a0b10;
+    --bg-panel: rgba(20, 22, 31, 0.7);
+    --primary: #00d2ff;
+    --primary-dim: rgba(0, 210, 255, 0.1);
+    --secondary: #7b2cbf;
+    --success: #00ff9d;
+    --warning: #ffbf00;
+    --danger: #ff0055;
+    --text-main: #e0e6ed;
+    --text-secondary: #94a3b8;
+    
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+    --neon-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(123, 44, 191, 0.1) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(0, 210, 255, 0.05) 0%, transparent 25%);
+    color: var(--text-main);
+    overflow-x: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(10, 11, 16, 0.8);
+    backdrop-filter: blur(12px);
+    border-bottom: var(--glass-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+h1 {
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.brand-highlight {
+    color: var(--primary);
+}
+
+/* Layout */
+main {
+    display: grid;
+    grid-template-columns: 1fr 380px; /* Main Rack Area | Sidebar */
+    gap: 2rem;
+    padding: 2rem;
+    flex: 1;
+    overflow: hidden; /* Prevent full page scroll, allow inner scroll if needed */
+}
+
+/* Rack Station Section */
+.rack-station {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.rack-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-dot {
+    height: 10px;
+    width: 10px;
+    background-color: var(--success);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px var(--success);
+    margin-right: 8px;
+}
+
+.visual-container {
+    position: relative;
+    width: 100%;
+    max-width: 900px; /* Constrain width for realism */
+    background: #000;
+    border-radius: 8px;
+    border: var(--glass-border);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.rack-image {
+    width: 100%;
+    display: block;
+    opacity: 0.8;
+}
+
+.rack-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* The Grid overlaying the image - adjusted for the generated image layout */
+/* Assuming two rows of 4 based on the prompt, or one row. Flex/Grid will be JS tuned */
+.rack-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); 
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px 15px; /* Adjust based on image physical spacing */
+    width: 61%; /* Tuned to fit the 'Bays' in the generated image */
+    height: 38%; /* Tuned to fit the 'Bays' */
+    margin-left: 17%; /* Offset to align with image */
+    margin-top: -1%;
+}
+
+.drive-bay {
+    cursor: pointer;
+    position: relative;
+    border: 1px dashed rgba(255,255,255,0.1);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.drive-bay:hover {
+    border-color: var(--primary);
+    background: rgba(0, 210, 255, 0.05);
+}
+
+.drive-bay.empty {
+    opacity: 0.3;
+}
+
+/* LEDs on the overlay */
+.led-group {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.led {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #333;
+    transition: background 0.3s;
+}
+
+.led.active { box-shadow: 0 0 5px currentColor; }
+.status-good { background: var(--success); box-shadow: 0 0 5px var(--success); }
+.status-bad { background: var(--danger); box-shadow: 0 0 5px var(--danger); animation: blink 1s infinite; }
+
+/* Selection state */
+.drive-bay.selected {
+    border: 1px solid var(--primary);
+    box-shadow: 0 0 15px var(--primary-dim);
+}
+
+
+/* Agent / Detail View */
+.agent-view {
+    background: var(--bg-panel);
+    border: var(--glass-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(10px);
+    flex: 1;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-panel {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+
+.detail-panel.active {
+    display: block;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.stat-label { color: var(--text-secondary); }
+.stat-value { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+.temp-normal { color: var(--success); }
+.temp-warn   { color: var(--warning); }
+.temp-crit   { color: var(--danger); }
+
+/* Sidebar - System Info */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.system-card {
+    background: var(--bg-panel);
+    border: var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: white;
+}
+
+.info-group {
+    margin-bottom: 1.2rem;
+}
+
+.info-group label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Progress Bars */
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+    position: relative;
+    display: inline-block;
+    width: 85%; /* Leave room for text */
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+    background: var(--primary);
+    color: #000;
+    box-shadow: 0 0 20px var(--primary-dim);
+}
+
+/* Log Terminal Style */
+.console-log {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 10px;
+}
+
+@keyframes blink { 50% { opacity: 0.5; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Mobile */
+@media (max-width: 1000px) {
+    main { grid-template-columns: 1fr; overflow-y: auto; }
+}
